@@ -1,0 +1,38 @@
+---
+- name: Пример плейбука для сервера Ubuntu
+  hosts: ubuntu1
+  become: true  # выполнение задач с правами суперпользователя (sudo)
+
+  tasks:
+    - name: Обновление пакетов
+      ansible.builtin.apt:
+        update_cache: true
+
+    - name: Обновление пакетов
+      ansible.builtin.apt:
+        upgrade: true
+
+    - name: Обновление пакетов
+      ansible.builtin.apt:
+        upgrade: dist
+
+    - name: Установка пакетов
+      ansible.builtin.apt:
+        name:
+          - nginx
+          - python3
+        state: present
+      become: true
+
+    - name: Настройка файрвола (UFW)
+      community.general.ufw:
+        rule: allow
+        port: 80
+      become: true
+
+  handlers:
+    - name: Restart Nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
+      become: true
