@@ -1,0 +1,59 @@
+bootstrap:
+  dcs:
+    ttl: 30
+    loop_wait: 10
+    retry_timeout: 10
+    maximum_lag_on_failover: 1048576
+    postgresql:
+      use_pg_rewind: true
+      use_slots: true
+      parameters:
+        shared_preload_libraries: 'repmgr'
+        max_wal_senders: 10
+        wal_keep_segments: 10
+  initdb:
+  - encoding: UTF8
+  - data-checksums
+  pg_hba:
+  - host replication replicator 0.0.0.0/0 md5
+  - host all all 0.0.0.0/0 md5
+postgresql:
+  listen: 192.168.109.203:5432
+  connect_address: '192.168.109.203:5432'
+  data_dir: /var/libpostgresql/15/main
+  pgpass: /tmp/pgpass
+  authentication:
+    replication:
+      username: repuser
+      password: passwd
+    superuser:
+      username: postgres
+      password: adminadmin
+  parameters:
+    unix_socket_directories: '.'
+    log_checkpoints: on
+    log_line_prefix: '%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '
+    log_lock_waits: on
+    log_min_messages: info
+    log_autovacuum_min_duration: 0
+  use_pg_rewind: true
+  pg_rewind:
+    username: repuser
+    password: passwd
+  pg_hba: 
+  - host replication replicator samenet trust
+  - host all all 0.0.0.0/0 md5
+  - host all all ::1/128 md5
+  - hostssl all all all cert clientcert=1
+  - hostssl all all all ca_file=/etc/ssl/certs/root.crt
+  - hostssl replication replicator samenet cert
+  - hostssl replication replicator samenet clientcert=1
+  - hostssl replication replicator samenet ca_file=/etc/ssl/certs/root.crt
+  - hostssl replication replicator samenet check_extern_ip
+  - hostssl replication replicator samenet check_extern_ip=1
+tags:
+  nofailover: false
+  noloadbalance: false
+  clonefrom: false
+  nosync: false
+  writable: true
